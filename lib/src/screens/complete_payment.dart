@@ -55,7 +55,7 @@ class _CompletePaymentState extends State<CompletePayment> {
         params['status'] = 'success';
         params['data'] = resp['data'];
 
-        await widget.onSuccess(params);
+        await widget.onSuccess(params.cast<String, dynamic>());
 
         setState(() {
           loading = false;
