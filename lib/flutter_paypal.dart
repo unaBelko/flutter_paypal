@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_paypal/src/screens/complete_payment.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
 // Import for Android features.
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+
 // Import for iOS features.
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
@@ -14,10 +16,13 @@ import 'src/PaypalServices.dart';
 import 'src/errors/network_error.dart';
 
 class UsePaypal extends StatefulWidget {
-  final Function onSuccess, onCancel, onError;
+  final Future<void> Function(Map<String, dynamic> params) onSuccess;
+  final Future<void> Function(dynamic error) onError;
+  final void Function() onCancel;
   final String returnURL, cancelURL, note, clientId, secretKey;
   final List transactions;
   final bool sandboxMode;
+
   const UsePaypal({
     Key? key,
     required this.onSuccess,
@@ -84,7 +89,7 @@ class UsePaypalState extends State<UsePaypal> {
             pageLoading = false;
             loadingError = false;
           });
-        _controller.loadRequest(Uri.parse(checkoutUrl));
+          _controller.loadRequest(Uri.parse(checkoutUrl));
         } else {
           widget.onError(res);
           setState(() {
@@ -182,20 +187,21 @@ class UsePaypalState extends State<UsePaypal> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => CompletePayment(
-                        url: request.url,
-                        services: services,
-                        executeUrl: executeUrl,
-                        accessToken: accessToken,
-                        onSuccess: widget.onSuccess,
-                        onCancel: widget.onCancel,
-                        onError: widget.onError)),
+                  builder: (context) => CompletePayment(
+                    url: request.url,
+                    services: services,
+                    executeUrl: executeUrl,
+                    accessToken: accessToken,
+                    onSuccess: widget.onSuccess,
+                    onCancel: widget.onCancel,
+                    onError: widget.onError,
+                  ),
+                ),
               );
             }
             if (request.url.contains(widget.cancelURL)) {
               final uri = Uri.parse(request.url);
-              await widget.onCancel(uri.queryParameters);
-              // ignore: use_build_context_synchronously
+              widget.onCancel();
               Navigator.of(context).pop();
             }
             debugPrint('allowing navigation to ${request.url}');
