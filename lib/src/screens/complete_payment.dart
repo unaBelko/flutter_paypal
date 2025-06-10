@@ -37,7 +37,7 @@ class _CompletePaymentState extends State<CompletePayment> {
     final uri = Uri.parse(widget.url);
     final payerID = uri.queryParameters['PayerID'];
     if (payerID != null) {
-      final params = <String, dynamic>{
+      final Map<String, dynamic> params = {
         "payerID": payerID,
         "paymentId": uri.queryParameters['paymentId'],
         "token": uri.queryParameters['token'],
@@ -55,7 +55,7 @@ class _CompletePaymentState extends State<CompletePayment> {
         params['status'] = 'success';
         params['data'] = resp['data'];
 
-        await widget.onSuccess(params.cast<String, dynamic>());
+        await widget.onSuccess(params);
 
         setState(() {
           loading = false;
